@@ -23,6 +23,8 @@ import (
 	teamhandlerget "github.com/hihikaAAa/PRManager/internal/http-server/handlers/team/get"
 	userhandlergetreview "github.com/hihikaAAa/PRManager/internal/http-server/handlers/user/getReview"
 	userhandlerisactive "github.com/hihikaAAa/PRManager/internal/http-server/handlers/user/isActive"
+	statsservice "github.com/hihikaAAa/PRManager/internal/services/statsservice"
+    statshandler "github.com/hihikaAAa/PRManager/internal/http-server/handlers/stats/getStats"
 	mwlogger "github.com/hihikaAAa/PRManager/internal/http-server/middleware/logger"
 	slogpretty "github.com/hihikaAAa/PRManager/internal/lib/logger/slogpretty"
 	"github.com/hihikaAAa/PRManager/internal/lib/logger/sl"
@@ -60,6 +62,8 @@ func main() {
 	prService := prservice.New(prRepo, userRepo)
 	teamService := teamservice.New(userRepo, teamRepo)
 	userService := userservice.New(prRepo, userRepo)
+	statService := statsservice.New(prRepo)
+
 
 	router := chi.NewRouter()
 
@@ -88,6 +92,8 @@ func main() {
 		r.Post("/merge", pullrequesthandlersmerge.New(log, prService))
 		r.Post("/reassign", pullrequesthandlerreassign.New(log, prService))
 	})
+
+	router.Get("/stats", statshandler.New(log, statService))
 
 	srv := &http.Server{
 		Addr: cfg.HTTPServer.Address,      
