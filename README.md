@@ -155,7 +155,7 @@
 ```
 ---
 
-###PullRequests
+### PullRequests
 
 #### Получение PR, где пользователь — ревьювер /users/getReview
 
