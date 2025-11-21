@@ -1,0 +1,10 @@
+env: prod
+
+http_server:
+  address: ":8080"
+  read_timeout: 5s
+  write_timeout: 5s
+  idle_timeout: 120s
+
+db:
+  dsn: "postgres://app_user:STRONG_PASSWORD@db:5432/prmanager?sslmode=disable"
