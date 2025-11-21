@@ -126,6 +126,9 @@
     ]
     }
 ```
+---
+
+### Users
 
 #### Установка активности пользователя `/users/setIsActive`
 
@@ -150,6 +153,9 @@
     }
     }
 ```
+---
+
+###PullRequests
 
 #### Получение PR, где пользователь — ревьювер /users/getReview
 
@@ -247,7 +253,21 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
     "replaced_by": "u5"
     }
 ```
+---
 
+### Health 
+
+#### Проверка работоспособности /health
+
+```bash
+curl http://localhost:8080/health
+```
+
+#### Ответ:
+
+```bash
+{"status":"ok"}
+```
 
 ---
 
