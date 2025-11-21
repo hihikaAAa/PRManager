@@ -88,13 +88,12 @@
         { "user_id": "u1", "username": "Alice", "is_active": true },
         { "user_id": "u2", "username": "Bob", "is_active": true }
     ]
-    }'
-    
+    }' 
 ```
 
 #### Ответ:
 
-    ```bash
+```bash
     {
         "team": {
         "team_name": "backend",
@@ -104,75 +103,75 @@
         ]
         }
     }
-    ```
+```
 
 #### Получение команды `/team/get?team_name=backend`
 
-    ```bash
+```bash
     curl -X GET "http://localhost:8080/team/get?team_name=backend"
-    ```
+```
 
 #### Ответ:
 
-    ```bash
-      {
-        "team_name": "backend",
-        "members": [
-          { "user_id": "u1", "username": "Alice", "is_active": true },
-          { "user_id": "u2", "username": "Bob", "is_active": true }
-        ]
-      }
-    ```
+```bash
+    {
+    "team_name": "backend",
+    "members": [
+        { "user_id": "u1", "username": "Alice", "is_active": true },
+        { "user_id": "u2", "username": "Bob", "is_active": true }
+    ]
+    }
+```
 
 #### Установка активности пользователя `/users/setIsActive`
 
-    ```bash
+```bash
     curl -X POST http://localhost:8080/users/setIsActive \
     -H "Content-Type: application/json" \
     -d '{
-        "user_id": "u2",
-        "is_active": false
-        }'
-    ```
+    "user_id": "u2",
+    "is_active": false
+    }'
+```
 
 #### Ответ:
 
-    ```bash
-        {
-        "user": {
-        "user_id": "u2",
-        "username": "Bob",
-        "team_name": "backend",
-        "is_active": false
+```bash
+    {
+    "user": {
+    "user_id": "u2",
+    "username": "Bob",
+    "team_name": "backend",
+    "is_active": false
     }
     }
-    ```
+```
 
 #### Получение PR, где пользователь — ревьювер /users/getReview
 
-    ```bash
-    curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
-    ```
+```bash
+curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
+```
 
 #### Ответ:
 
-    ```bash
-        {
-            "user_id": "u2",
-            "pull_requests": [
-            {
-            "pull_request_id": "pr-1001",
-            "pull_request_name": "Add search",
-            "author_id": "u1",
-            "status": "OPEN"
-            }
-        ]
-        }
-    ```
+```bash
+    {
+    "user_id": "u2",
+    "pull_requests": [
+    {
+    "pull_request_id": "pr-1001",
+    "pull_request_name": "Add search",
+    "author_id": "u1",
+    "status": "OPEN"
+    }
+    ]
+    }
+```
 
 #### Создание PR /pullRequest/create
 
-    ```bash
+```bash
     curl -X POST http://localhost:8080/pullRequest/create \
     -H "Content-Type: application/json" \
     -d '{
@@ -180,12 +179,12 @@
     pull_request_name": "Add search",
     "author_id": "u1"
     }'
-    ```
+```
 
 #### Ответ:
 
-    ```bash
-        {
+```bash
+    {
     "pr": {
         "pull_request_id": "pr-1001",
         "pull_request_name": "Add search",
@@ -196,47 +195,47 @@
         "mergedAt": null
     }
     }
-    ```
+```
 
 #### Merge PR (идемпотентно) /pullRequest/merge
 
-    ```bash
+```bash
     curl -X POST http://localhost:8080/pullRequest/merge \
     -H "Content-Type: application/json" \
     -d '{
     "pull_request_id": "pr-1001"
     }'
-    ```
+```
 
 #### Ответ:
 
-    ``` bash
-        {
-        "pr": {
-            "pull_request_id": "pr-1001",
-            "pull_request_name": "Add search",
-            "author_id": "u1",
-            "status": "MERGED",
-            "assigned_reviewers": ["u2", "u3"],
-            "mergedAt": "2025-10-24T12:34:56Z"
+``` bash
+    {
+    "pr": {
+        "pull_request_id": "pr-1001",
+        "pull_request_name": "Add search",
+        "author_id": "u1",
+        "status": "MERGED",
+        "assigned_reviewers": ["u2", "u3"],
+        "mergedAt": "2025-10-24T12:34:56Z"
         }
         }
-    ```
+```
 
 #### Переназначение ревьювера /pullRequest/reassign
 
-    ```bash
+```bash
     curl -X POST http://localhost:8080/pullRequest/reassign \
-        -H "Content-Type: application/json" \
-        -d '{
-        "pull_request_id": "pr-1001",
-        "old_user_id": "u2"
-        }'
-    ```
+    -H "Content-Type: application/json" \
+    -d '{
+    "pull_request_id": "pr-1001",
+    "old_user_id": "u2"
+    }'
+```
 
 #### Ответ:
 
-    ```bash
+```bash
     {
     "pr": {
         "pull_request_id": "pr-1001",
@@ -247,7 +246,7 @@
     },
     "replaced_by": "u5"
     }
-    ```
+```
 
 
 ---
