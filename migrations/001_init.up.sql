@@ -24,7 +24,7 @@ CREATE TABLE pull_requests (
     pull_request_name TEXT NOT NULL,
     author_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
     status pr_status NOT NULL,
-    created_at IMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     merged_at TIMESTAMPTZ
 );
 

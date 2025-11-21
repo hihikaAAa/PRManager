@@ -81,12 +81,16 @@
 
 ```bash 
     curl -X POST http://localhost:8080/team/add \
-    H "Content-Type: application/json" \
+    -H "Content-Type: application/json" \
     -d '{
     "team_name": "backend",
     "members": [
         { "user_id": "u1", "username": "Alice", "is_active": true },
-        { "user_id": "u2", "username": "Bob", "is_active": true }
+        { "user_id": "u2", "username": "Bob", "is_active": true },
+        { "user_id": "u3", "username": "Sergei", "is_active": true },
+        { "user_id": "u4", "username": "Clare", "is_active": true },
+        { "user_id": "u5", "username": "Max", "is_active": true },
+        { "user_id": "u6", "username": "Nikita", "is_active": true }
     ]
     }' 
 ```
@@ -172,13 +176,9 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
 #### Создание PR /pullRequest/create
 
 ```bash
-    curl -X POST http://localhost:8080/pullRequest/create \
+    curl -i -X POST "http://localhost:8080/pullRequest/create" \
     -H "Content-Type: application/json" \
-    -d '{
-    "pull_request_id": "pr-1001",
-    pull_request_name": "Add search",
-    "author_id": "u1"
-    }'
+    --data-raw '{"pull_request_id":"pr-1001","pull_request_name":"Add search","author_id":"u1"}'
 ```
 
 #### Ответ:
@@ -229,7 +229,7 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
     -H "Content-Type: application/json" \
     -d '{
     "pull_request_id": "pr-1001",
-    "old_user_id": "u2"
+    "old_user_id": "u6"
     }'
 ```
 
@@ -322,7 +322,7 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
 Юнит-тесты домена/сервисов/репозиториев можно запускать командой:
 
 ```bash
-    make test
+make test
 ```
 
 --- 
