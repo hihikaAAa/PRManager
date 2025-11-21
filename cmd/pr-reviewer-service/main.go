@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi/v5"
+	chi "github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
 	_ "github.com/lib/pq"
@@ -21,6 +21,7 @@ import (
 	pullrequesthandlerreassign "github.com/hihikaAAa/PRManager/internal/http-server/handlers/pullrequest/reassign"
 	teamhandleradd "github.com/hihikaAAa/PRManager/internal/http-server/handlers/team/add"
 	teamhandlerget "github.com/hihikaAAa/PRManager/internal/http-server/handlers/team/get"
+	teamhandlerdeactivate "github.com/hihikaAAa/PRManager/internal/http-server/handlers/team/deactivate"
 	userhandlergetreview "github.com/hihikaAAa/PRManager/internal/http-server/handlers/user/getReview"
 	userhandlerisactive "github.com/hihikaAAa/PRManager/internal/http-server/handlers/user/isActive"
 	statsservice "github.com/hihikaAAa/PRManager/internal/services/statsservice"
@@ -60,7 +61,7 @@ func main() {
 	teamRepo := postgres.NewTeamRepository(db)
 
 	prService := prservice.New(prRepo, userRepo)
-	teamService := teamservice.New(userRepo, teamRepo)
+	teamService := teamservice.New(userRepo, teamRepo, prRepo)
 	userService := userservice.New(prRepo, userRepo)
 	statService := statsservice.New(prRepo)
 
@@ -80,6 +81,7 @@ func main() {
 	router.Route("/team", func(r chi.Router) {
 		r.Post("/add", teamhandleradd.New(log, teamService))
 		r.Get("/get", teamhandlerget.New(log, teamService))
+		r.Post("/deactivate", teamhandlerdeactivate.New(log, teamService))
 	})
 
 	router.Route("/users", func(r chi.Router) {

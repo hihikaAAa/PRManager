@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hihikaAAa/PRManager/internal/domain/pull-request"
+	pullrequest "github.com/hihikaAAa/PRManager/internal/domain/pull-request"
 	"github.com/hihikaAAa/PRManager/internal/repository/postgres/repo_errors"
 )
 
@@ -223,4 +223,89 @@ func (r *PRRepository) FindShortByReviewer(ctx context.Context, userID string)([
 	}
 
 	return result, nil
+}
+
+func (r *PRRepository) GetOpenPRIDsByReviewer(ctx context.Context, userID string) ([]string, error) {
+	const op = "internal.repository.postgres.pr_repo.GetOpenPRIDsByReviewer"
+
+	const q = `
+		SELECT pr.pull_request_id
+		FROM pull_requests pr
+		JOIN pull_request_reviewers r
+			ON pr.pull_request_id = r.pull_request_id
+		WHERE r.user_id = $1 AND pr.status = 'OPEN';
+	`
+
+	rows, err := r.db.QueryContext(ctx, q, userID)
+	if err != nil {
+		return nil, fmt.Errorf("%s, QueryContext: %w", op, err)
+	}
+	defer rows.Close()
+
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("%s, Scan: %w", op, err)
+		}
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s, rows.Err: %w", op, err)
+	}
+
+	return ids, nil
+}
+
+func (r *PRRepository) RemoveReviewer(ctx context.Context, prID, revID string) error {
+	const op = "internal.repository.postgres.pr_repo.RemoveReviewer"
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("%s, BeginTx: %w", op, err)
+	}
+	defer tx.Rollback()
+
+	const qPR = `
+		SELECT status
+		FROM pull_requests
+		WHERE pull_request_id = $1;
+	`
+
+	var status pullrequest.Status
+	if err := tx.QueryRowContext(ctx, qPR, prID).Scan(&status); err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("%s: %w", op, repo_errors.ErrPRNotFound)
+		}
+		return fmt.Errorf("%s, QueryRow PR: %w", op, err)
+	}
+
+	if status == pullrequest.StatusMerged {
+		return fmt.Errorf("%s: %w", op, repo_errors.ErrPRMerged)
+	}
+
+	const qDel = `
+		DELETE FROM pull_request_reviewers
+		WHERE pull_request_id = $1 AND user_id = $2;
+	`
+
+	res, err := tx.ExecContext(ctx, qDel, prID, revID)
+	if err != nil {
+		return fmt.Errorf("%s, Exec delete: %w", op, err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s, RowsAffected delete: %w", op, err)
+	}
+	if affected == 0 {
+		return fmt.Errorf("%s: %w", op, repo_errors.ErrReviewersNotFound)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("%s: Commit: %w", op, err)
+	}
+
+	return nil
 }
