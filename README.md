@@ -321,9 +321,9 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
 
 Юнит-тесты домена/сервисов/репозиториев можно запускать командой:
 
-    ```bash
+```bash
     make test
-    ```
+```
 
 --- 
 
