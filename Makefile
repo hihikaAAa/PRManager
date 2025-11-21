@@ -1,7 +1,7 @@
 BINARY_NAME = prmanager
 CMD_DIR = ./cmd/pr-reviewer-service
 
-.PHONY: build run-local test docker-build docker-up docker-down
+.PHONY: build run-local test docker-build docker-up docker-down lint
 
 build:
 	go build -o bin/$(BINARY_NAME) $(CMD_DIR)
@@ -20,3 +20,6 @@ docker-up:
 
 docker-down:
 	docker-compose down
+
+lint:
+	golangci-lint run ./...
