@@ -66,7 +66,6 @@ func New(log *slog.Logger, prMerger PrMerger) http.HandlerFunc{
 			}
 			return
 		}
-
 		resp := buildResponse(pullreq)
 
 		logger.Info("pr merged", slog.String("prID", resp.PullRequest.PullRequestID))

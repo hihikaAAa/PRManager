@@ -44,7 +44,7 @@
 
 Проект организован по слоям:
 
-- `cmd/pr-reviewer-service/main.go` — точка входа, роутинг, запуск сервера
+- `cmd/pr-reviewer-service/main.go` - точка входа, роутинг, запуск сервера
 - `config` - конфигурация сервера + dsn для БД
 - `internal/domain`
   - `user.User`
@@ -65,10 +65,10 @@
   - `/team/add`, `/team/get`
   - `/users/setIsActive`, `/users/getReview`
   - `/pullRequest/create`, `/pullRequest/merge`, `/pullRequest/reassign`
-- `internal/lib/logger` — логгер на базе `slog` + pretty handler
-- `internal/storage` — создание `*sql.DB`
+- `internal/lib/logger` - логгер на базе `slog` + pretty handler
+- `internal/storage` - создание `*sql.DB`
 
-БД — PostgreSQL.
+БД - PostgreSQL.
 
 ---
 
@@ -105,6 +105,10 @@
         "members": [
       { "user_id": "u1", "username": "Alice", "is_active": true },
       { "user_id": "u2", "username": "Bob", "is_active": true }
+      { "user_id": "u3", "username": "Sergei", "is_active": true },
+      { "user_id": "u4", "username": "Clare", "is_active": true },
+      { "user_id": "u5", "username": "Max", "is_active": true },
+      { "user_id": "u6", "username": "Nikita", "is_active": true }
         ]
         }
     }
@@ -124,6 +128,10 @@
     "members": [
         { "user_id": "u1", "username": "Alice", "is_active": true },
         { "user_id": "u2", "username": "Bob", "is_active": true }
+        { "user_id": "u3", "username": "Sergei", "is_active": true },
+        { "user_id": "u4", "username": "Clare", "is_active": true },
+        { "user_id": "u5", "username": "Max", "is_active": true },
+        { "user_id": "u6", "username": "Nikita", "is_active": true }
     ]
     }
 ```
@@ -158,7 +166,7 @@
 
 ### PullRequests
 
-#### Получение PR, где пользователь — ревьювер /users/getReview
+#### Получение PR, где пользователь - ревьювер /users/getReview
 
 ```bash
 curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
@@ -307,31 +315,31 @@ curl http://localhost:8080/health
 ## Конфигурация 
 
 Загрузка конфига: 
-- CONFIG_PATH (env) — путь к YAML-файлу
-- Структура — internal/config.Config
+- CONFIG_PATH (env) - путь к YAML-файлу
+- Структура - internal/config.Config
 
 Поля структуры:
-- env — "local" | "dev" | "prod" — влияет на формат и уровень логов
-- http_server.address — адрес HTTP-сервера (по умолчанию: 8080)
+- env - "local" | "dev" | "prod" - влияет на формат и уровень логов
+- http_server.address - адрес HTTP-сервера (по умолчанию: 8080)
 - http_server.read_timeout, write_timeout, idle_timeout - необходимые таймауты
-- db.dsn — строка подключения к PostgreSQL
+- db.dsn - строка подключения к PostgreSQL
 
 ---
 
 ## Доменные правила
 
-- User.is_active = false — пользователь никогда не назначается ревьювером
+- User.is_active = false - пользователь никогда не назначается ревьювером
 - При создании PR:
   - ищутся активные пользователи из команды автора, кроме самого автора;
   - выбираются до двух случайных ревьюверов;
-  - если доступен только один — назначается один;
-  - если нет ни одного — список ревьюверов пустой.
+  - если доступен только один - назначается один;
+  - если нет ни одного - список ревьюверов пустой.
 - При reassign:
   - сначала проверяется, что PR не MERGED;
   - проверяется, что old_user_id действительно один из ревьюверов;
   - ищутся активные пользователи команды старого ревьювера, исключая автора и всех текущих ревьюверов;
   - случайно выбирается один кандидат;
-  - если кандидатов нет — ошибка NO_CANDIDATE.
+  - если кандидатов нет - ошибка NO_CANDIDATE.
 - merge: 
   - идемпотентен: повторный вызов возвращает актуальное состояние PR;
   - внутри репозитория используется UPDATE ... WHERE status = 'OPEN' + SELECT, чтобы корректно обрабатывать повтор.
@@ -364,12 +372,12 @@ make test
 
 #### Описание эндпоинта
 
-- total_pr — общее количество PR в системе
-- open_pr — количество PR в статусе OPEN
-- merged_pr — количество PR в статусе MERGED
-- reviewers — массив объектов вида { user_id, count }, где
-  - user_id — идентификатор пользователя;
-  - count — сколько раз этот пользователь был назначен ревьювером (во всех PR).
+- total_pr - общее количество PR в системе
+- open_pr - количество PR в статусе OPEN
+- merged_pr - количество PR в статусе MERGED
+- reviewers - массив объектов вида { user_id, count }, где
+  - user_id - идентификатор пользователя;
+  - count - сколько раз этот пользователь был назначен ревьювером (во всех PR).
 
 #### Пример запроса
 
@@ -423,23 +431,18 @@ curl -X POST http://localhost:8080/team/deactivate \
 }
 ```
 
-### 4. Реализовать интеграционное или E2E-тестирование.
-
-
-
-
 ### 5. Описать конфигурацию линтера.
 
 В проекте используется `golangci-lint`(https://github.com/golangci/golangci-lint) с конфигурацией в файле `.golangci.yml` в корне репозитория.
 
 Основные включённые линтеры:
 
-- `gofmt`, `goimports` — форматирование кода и импортов
-- `govet`, `staticcheck`, `gosimple` — статический анализ и поиск типичных ошибок
-- `revive` — проверки стиля и best practices
-- `errcheck`, `ineffassign` — необработанные ошибки и неиспользуемые присваивания
-- `gocyclo` — контроль цикломатической сложности
-- `misspell` — поиск опечаток в комментариях и строках.
+- `gofmt`, `goimports` - форматирование кода и импортов
+- `govet`, `staticcheck`, `gosimple` - статический анализ и поиск типичных ошибок
+- `revive` - проверки стиля и best practices
+- `errcheck`, `ineffassign` - необработанные ошибки и неиспользуемые присваивания
+- `gocyclo` - контроль цикломатической сложности
+- `misspell` - поиск опечаток в комментариях и строках.
 
 Запуск линтера локально:
 
