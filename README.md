@@ -162,9 +162,6 @@
     }
     }
 ```
----
-
-### PullRequests
 
 #### Получение PR, где пользователь - ревьювер /users/getReview
 
@@ -187,6 +184,10 @@ curl -X GET "http://localhost:8080/users/getReview?user_id=u2"
     ]
     }
 ```
+
+---
+
+### PullRequests
 
 #### Создание PR /pullRequest/create
 
