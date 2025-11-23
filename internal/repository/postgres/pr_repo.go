@@ -70,31 +70,41 @@ func (r *PRRepository) GetWithReviewers(ctx context.Context, id string)(*pullreq
 		return nil , fmt.Errorf("%s, QueryRow: %w", op, err)
 	}
 
+	rev,err := r.GetReviewers(ctx,id)
+	if err != nil{
+		return nil, fmt.Errorf("%s:%w",op,err)
+	}
+	pr.Reviewers = rev
+	return pr, nil
+}
+
+func(r *PRRepository) GetReviewers(ctx context.Context, prID string)([]string,error){
+	const op = "internal.repository.postgres.pr_repo.GetReviewers"
+
 	const qRev = `
-	SELECT user_id
+	SELECT user_id 
 	FROM pull_request_reviewers
 	WHERE pull_request_id = $1
 	`
-
-	rows, err := r.db.QueryContext(ctx, qRev, id)
+	
+	rows, err := r.db.QueryContext(ctx,qRev,prID)
 	if err != nil{
-		return nil, fmt.Errorf("%s, QueryContextRev: %w", op, err)
+		return nil, fmt.Errorf("%s,QueryContextRev: %w", op, err)
 	}
 	defer rows.Close()
-
+	rev := []string{}
 	for rows.Next(){
 		var uid string
 		if err := rows.Scan(&uid); err != nil{
 			return nil, fmt.Errorf("%s, Scan: %w", op, err)
 		}
-		pr.Reviewers = append(pr.Reviewers, uid)
+		rev = append(rev, uid)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows.Err: %w", err)
+		return  nil, fmt.Errorf("rows.Err: %w", err)
 	}
-
-	return pr, nil
+	return rev, nil
 }
 
 func (r *PRRepository) Merge(ctx context.Context, id string, now time.Time) (*pullrequest.PullRequest, error) {
@@ -102,7 +112,7 @@ func (r *PRRepository) Merge(ctx context.Context, id string, now time.Time) (*pu
 
 	const qUpdate = `
 		UPDATE pull_requests
-		SET status   = $2, merged_at = COALESCE(merged_at, $3)
+		SET status = $2, merged_at = COALESCE(merged_at, $3)
 		WHERE pull_request_id = $1 AND status = 'OPEN'
 		RETURNING pull_request_id, pull_request_name, author_id, status, created_at, merged_at;
 	`
@@ -110,6 +120,11 @@ func (r *PRRepository) Merge(ctx context.Context, id string, now time.Time) (*pu
 
 	err := r.db.QueryRowContext(ctx, qUpdate, id, pullrequest.StatusMerged, now).Scan(&pr.ID, &pr.Name, &pr.AuthorID, &pr.Status, &pr.CreatedAt, &pr.MergedAt)
 	if err == nil {
+		rev,err := r.GetReviewers(ctx,pr.ID)
+		if err != nil{
+			return nil, fmt.Errorf("%s:%w",op,err)
+		}
+		pr.Reviewers = rev
 		return pr, nil
 	}
 	if err != sql.ErrNoRows {
@@ -128,6 +143,12 @@ func (r *PRRepository) Merge(ctx context.Context, id string, now time.Time) (*pu
 		}
 		return nil, fmt.Errorf("%s, QueryRowContext: %w", op, err)
 	}
+	rev,err := r.GetReviewers(ctx,pr.ID)
+	if err != nil{
+		return nil, fmt.Errorf("%s:%w",op,err)
+	}
+	pr.Reviewers = rev
+
 	return pr, nil
 }
 
